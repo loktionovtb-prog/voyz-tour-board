@@ -1,0 +1,7 @@
+backups/
+qa-output/
+*.log
+*.zip
+test-*.json
+upgrade-*.cjs
+v2-body.js

@@ -1,0 +1,10 @@
+{
+  "name": "voyz-tour-board",
+  "version": "3.0.0",
+  "private": true,
+  "description": "Offline travel itinerary board and per-tour CRM",
+  "scripts": {
+    "start": "node server.cjs",
+    "check": "node --check dist/app.js && node --check dist/storage.js && node --check dist/exports.js && node --check server.cjs"
+  }
+}
