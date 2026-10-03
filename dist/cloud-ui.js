@@ -5,6 +5,18 @@
   const $ = s => document.querySelector(s);
   const shareParameters = new URLSearchParams(location.hash.slice(1));
   const shareToken = shareParameters.get('share'), isSharedView = shareParameters.has('share');
+  // Hash-only navigation reuses this document. Reload for a different shared
+  // route or when entering/leaving its isolated viewer; auth hash cleanup stays
+  // in the current document because it does not change the share parameter.
+  window.addEventListener('hashchange', () => {
+    const next = new URLSearchParams(location.hash.slice(1));
+    if (next.has('share') !== isSharedView || next.get('share') !== shareToken) location.reload();
+  });
+  // Read only known, non-secret failure markers. The SDK owns session tokens.
+  let incomingAuthFailure = shareParameters.get('error_code') === 'otp_expired'
+    ? 'Ссылка для входа уже использована или срок её действия закончился. Запросите новую ссылку ниже и откройте её один раз на этом устройстве.'
+    : shareParameters.has('error') || shareParameters.has('error_code')
+      ? 'По этой ссылке не удалось войти. Запросите новую ссылку ниже и откройте её на этом устройстве.' : '';
   let board, cloud, session = null, account = '', metadata = null;
   let enabled = false, blocked = false, applying = false, generation = 0;
   let localImport = null, timer = null, queue = Promise.resolve(), authQueue = Promise.resolve();
@@ -395,6 +407,7 @@
     if (isSharedView) return;
     const id = next?.user?.id || '';
     session = next;
+    if (id) incomingAuthFailure = '';
     if (id && id === account) { renderStatus(); return; }
     clearTimeout(timer); timer = null;
     enabled = false; blocked = false; needsSetup = false; generation++;
@@ -407,7 +420,8 @@
         throw error;
       }
       unlockWork();
-      setStatus('Вы в местном пространстве. Здесь сохраняется исходная доска; онлайн-туры остаются в аккаунте.');
+      setStatus(incomingAuthFailure || 'Вы в местном пространстве. Здесь сохраняется исходная доска; онлайн-туры остаются в аккаунте.', !!incomingAuthFailure);
+      if (incomingAuthFailure) show(dialog);
       return;
     }
     if (!board.namespace()) localImport = board.getLibrary();
@@ -441,6 +455,7 @@
   }
   async function logout() {
     clearTimeout(timer); timer = null; enabled = false; generation++;
+    incomingAuthFailure = '';
     forgetAccount();
     let error;
     try { await cloud.signOut(); } catch (caught) { error = caught; }
@@ -469,6 +484,7 @@
       event.preventDefault(); requestCode.disabled = true;
       try {
         loginEmail = emailInput.value.trim(); await cloud.signIn(loginEmail);
+        incomingAuthFailure = '';
         setStatus(usesOTP() ? 'Код отправлен на ' + loginEmail + '. Введите цифры из письма.' : 'Ссылка для входа отправлена на ' + loginEmail + '. Откройте письмо на этом устройстве и нажмите ссылку. Проверьте папку «Спам», если письмо не видно.');
         if (usesOTP()) $('#voyz-login-code').focus();
       }
