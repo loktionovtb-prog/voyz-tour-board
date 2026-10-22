@@ -152,6 +152,7 @@
     status = message;
     errorStatus = isError;
     renderStatus();
+    document.dispatchEvent(new CustomEvent('voyz-cloud-status',{detail:{account,enabled,error:isError,message,saved:!!account&&enabled&&!isError&&message.startsWith('Всё сохранено онлайн')}}));
   }
   function renderStatus() {
     if (!onlineButton) return;
@@ -440,12 +441,12 @@
       accountCacheWasNew = opened.isNew;
       accountSeed = canonical(opened.library);
       needsSetup = true;
-      setStatus('Выберите, с каких туров начать. Местные маршруты и клиенты отправляются в аккаунт только после вашего выбора.');
-      show(dialog);
+      setStatus('Открываем все ваши онлайн-туры…');
+      await initializeAccount(false);
     } else {
       enabled = true;
       setStatus('Ваши туры открыты с этого устройства. Проверяем онлайн-обновления…');
-      pullAll(false);
+      await pullAll(false);
     }
     renderStatus();
   }
@@ -742,3 +743,4 @@
   if (window.VoyzBoard) boot();
   else document.addEventListener('voyz-ready', boot, {once: true});
 })();
+
