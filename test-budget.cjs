@@ -1,0 +1,15 @@
+const assert=require('node:assert/strict'),fs=require('fs');const M=require('./dist/budget-model.js');
+const b=M.validate(M.seed());let c=M.compute(b);assert.equal(c.plan,338600);assert.equal(c.unknown,6);assert.equal(c.perGuest,56433.33);assert.equal(c.profitPlan,null);
+const water=b.lines.find(r=>r.name.includes('Девичьи'));assert.equal(c.rows.find(r=>r.id===water.id).quantity,7);assert.equal(c.rows.find(r=>r.id===water.id).plan,10500);
+const ala=b.lines.find(r=>r.name.includes('Алтын-Арашан /'));assert.equal(c.rows.find(r=>r.id===ala.id).plan,31500);
+b.settings.rates.USD=90;for(const v of b.vehicles){v.km=1000;v.consumption=15;}c=M.compute(b);assert.equal(c.plan,518600);assert.equal(c.unknown,2);assert.equal(c.rows.find(r=>r.id===b.vehicles[0].id+'-fuel').plan,18000);
+const food=b.lines.find(r=>r.category==='Питание');b.settings.guides=3;M.resize(b,'cars',3);c=M.compute(b);assert.equal(b.vehicles.length,3);assert.equal(c.rows.find(r=>r.id===food.id).plan,48000);assert.equal(c.rows.find(r=>r.id===ala.id).quantity,10);assert.equal(c.rows.find(r=>r.id===water.id).quantity,7);
+M.resize(b,'nights',8);b.settings.nights=8;assert.equal(b.lines.filter(r=>r.night).length,8);M.resize(b,'nights',5);b.settings.nights=5;assert.equal(b.lines.filter(r=>r.night).length,5);
+b.lines[0].actual=0;b.lines[0].closed=true;c=M.compute(b);assert.equal(c.rows[0].forecast,0);assert.equal(c.rows[0].delta,-45000);assert.equal(c.actualCount,1);b.lines.filter(r=>r.night).at(-1).actual=200;assert.throws(()=>M.resize(b,'nights',1),/факт/);
+for(const r of b.lines)if(r.price===null)r.price=0;b.settings.salePrice=150000;b.settings.received=400000;c=M.compute(b);assert.equal(c.unknown,0);assert.equal(c.profitForecast,c.revenue-c.forecast);assert.equal(c.cash,399800);assert.equal(c.remaining,c.forecast-c.actual);
+const copy=M.validate(JSON.parse(JSON.stringify(b)));copy.settings.currency='EUR';copy.settings.rates={KGS:0.01,USD:1};assert.notEqual(M.compute(copy).plan,c.plan);const p=M.portfolio([b,copy]);assert.equal(p.KGS.count,1);assert.equal(p.EUR.count,1);assert.equal(p.KGS.completed,0);
+b.settings.stage='completed';for(const r of b.lines){r.actual=0;r.closed=true;}for(const v of b.vehicles){v.actualRent=0;v.actualFuel=0;v.rentClosed=true;v.fuelClosed=true;}assert.equal(M.portfolio([b]).KGS.completedProfit,900000);
+assert.throws(()=>M.validate({...b,settings:{...b.settings,guests:0}}));assert.throws(()=>M.validate({...b,settings:{...b.settings,rates:{USD:-1}}}));
+const zero=M.seed();zero.vehicles[0].count=0;assert.equal(M.compute(zero).rows.find(r=>r.id===zero.vehicles[0].id+'-fuel').plan,0);
+fs.mkdirSync('qa-output',{recursive:true});fs.writeFileSync('qa-output/budget-seed.json',JSON.stringify(M.seed(),null,2));
+const workbook=require('./dist/budget-xlsx.js');workbook([{name:'Проверка',rows:[['Название','Число','Текст'],['Тур Кыргызстан',338600,'=1+1'],['Ноль',0,'<кириллица>']]}]).arrayBuffer().then(buf=>{fs.writeFileSync('qa-output/budget-export-test.xlsx',Buffer.from(buf));console.log('PASS: base estimate, extra horse, 3 guides/3 cars, nights, fuel, currencies, blank vs zero, actual forecast, cash, portfolio, validations, XLSX ZIP.');});
