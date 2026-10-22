@@ -13,18 +13,19 @@
   <script src="vendor/pdf-lib.min.js" defer></script>
   <script src="storage.js" defer></script>
   <script src="exports.js" defer></script>
-  <script src="app.js" defer></script>
+  <script src="app.js?v=workspace2" defer></script>
   <script src="vendor/supabase.js" defer></script>
   <script src="cloud-config.js" defer></script>
   <script src="cloud-sync.js" defer></script>
-  <script src="cloud-ui.js" defer></script>
+  <script src="cloud-ui.js?v=workspace2" defer></script>
+  <script src="workspace-bridge.js?v=2" defer></script>
   <script src="offline.js" defer></script>
 </head>
 <body>
   <header class="app-header">
     <a class="brand" href="#" aria-label="Voyz Tour Board"><img src="assets/voyz-logo.png" alt="VOYZ"><small>TOUR BOARD</small></a>
     <button id="focus-toggle" class="button subtle" aria-pressed="false">Больше места</button><div class="header-center"><span class="private-icon">◈</span> Моё пространство <span class="slash">/</span> Доска маршрута</div>
-    <div class="header-actions"><a class="button subtle" href="budget.html">Сметы</a><span id="save-status" class="save-status" role="status">Открываем туры…</span><button id="backup-btn" class="button">Бэкап всех туров</button><button id="export-btn" class="button subtle">JSON тура</button><button id="import-btn" class="button subtle">Импорт</button></div>
+    <div class="header-actions"><a class="button subtle" data-workspace-budget href="budget.html">Поездки и сметы</a><span id="workspace-cloud-status" role="status" style="font-size:12px;max-width:230px">Загружаем аккаунт…</span><span id="save-status" class="save-status" role="status">Открываем туры…</span><button id="backup-btn" class="button">Бэкап всех туров</button><button id="export-btn" class="button subtle">JSON тура</button><button id="import-btn" class="button subtle">Импорт</button></div>
   </header>
   <div class="tour-tabs-bar"><button id="tour-list-btn" class="button subtle">Все туры</button><div id="tour-tabs" role="tablist" aria-label="Мои туры"></div><button id="new-tour-btn" class="button">＋ Новый тур</button><button id="tour-menu-btn" class="button subtle" aria-label="Настройки тура">•••</button></div>
   <section class="tour-bar">
@@ -63,5 +64,6 @@
   <dialog id="help-dialog"><span class="dialog-kicker">СВОБОДА ПЛАНИРОВАТЬ</span><h2>Ваша доска путешествия</h2><ul><li><strong>Редактируйте на месте.</strong> Нажмите на заголовок, текст или заметку. Названия обоих блоков заметок тоже редактируются.</li><li><strong>Ширина карточки.</strong> Тяните ↔ за правый край. На телефоне ширина подстраивается под экран.</li><li><strong>Больше места.</strong> Кнопка вверху скрывает заголовок и даты. «Все туры» открывает поиск по вкладкам.</li><li><strong>Проживание.</strong> Добавьте название и ссылку на отель или карту. Ссылка попадает и в PDF.</li><li><strong>В пути.</strong> Вертикальная лента маршрута удобна на телефоне и планшете.</li><li><strong>Двигайте карточки.</strong> Тяните за ⠿ в шапке. На компьютере фон доски тоже можно перетаскивать.</li><li><strong>Меняйте порядок.</strong> Перетаскивайте дни в списке слева или используйте кнопки ↑ и ↓ на карточке. Порядок дней и стрелки редактируются отдельно. Каждый ряд раскладывается слева направо.</li><li><strong>Добавляйте фотографии.</strong> Кнопка на обложке откроет выбор файла. Фото сжимаются и сохраняются вместе с маршрутом.</li><li><strong>Сохраняйте копии.</strong> Изменения остаются в этом браузере. Экспорт JSON сохраняет весь маршрут с вашими фото; импорт открывает его на другом устройстве.</li><li><strong>Другие туры.</strong> Создайте вкладку кнопкой «Новый тур». Вкладка «Клиенты» хранит участников и оплаты отдельно для каждого тура.</li><li><strong>Стрелки.</strong> Нажмите «＋ Стрелка», затем ↗ у двух карточек. Клик по линии открывает её редактирование. Кнопка «Связи» показывает все стрелки.</li><li><strong>События.</strong> Тяните за ⠿ рядом с событием или используйте ↑ / ↓.</li><li><strong>Файлы.</strong> Кнопка PDF выгружает полный маршрут; PNG и JPG под карточкой — один день для галереи. Общий JSON-бэкап содержит все туры и клиентов.</li><li><strong>На телефоне</strong> карточки идут одной лентой. Менять порядок можно кнопками ↑ и ↓.</li></ul><p class="help-note">Локальное сохранение привязано к браузеру и адресу. Подключение онлайн-пространства выполняется через «Онлайн». До подключения общей базы данные остаются на этом устройстве. Храните также копию JSON.</p><button id="help-close" class="button primary">Всё понятно</button></dialog>
 </body>
 </html>
+
 
 

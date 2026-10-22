@@ -161,7 +161,7 @@
   function endDrag(){if(!dragging)return;if(['card','resize'].includes(dragging.type)){dragging.el.classList.remove('dragging','resizing');if(dragging.type==='resize'&&dragging.reflow)layoutDays();save();}dragging=null;viewport.classList.remove('panning');}viewport.onpointerup=endDrag;viewport.onpointercancel=endDrag;
   window.addEventListener('resize',()=>{if(state){applyZoom();draw();}});document.addEventListener('visibilitychange',()=>{if(document.hidden&&dirty)saveNow();});window.addEventListener('pagehide',()=>{if(dirty&&library)VoyzStorage.checkpoint(snapshot());});window.addEventListener('beforeunload',e=>{if(dirty||pending){VoyzStorage.checkpoint(snapshot());e.preventDefault();e.returnValue='';}});
   function exposeBoard(){
-    window.VoyzBoard={getLibrary:snapshot,namespace:()=>currentNamespace,normalizeTour,safeLink,newId:uid,
+    window.VoyzBoard={selectTour:(id,view='board')=>{switchTour(id);setMode(view==='crm'?'crm':'board');},getLibrary:snapshot,namespace:()=>currentNamespace,normalizeTour,safeLink,newId:uid,
       async setLibrary(raw){
         const next=normalizeLibrary(raw),editVersion=changes;
         if((dirty||pending)&&!await saveNow())throw new Error('Сначала сохраните локальную копию: запись в браузер недоступна.');
@@ -194,5 +194,6 @@
     document.dispatchEvent(new Event('voyz-ready',{bubbles:true}));
   }else boot();
 })();
+
 
 
