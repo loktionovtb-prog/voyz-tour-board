@@ -130,6 +130,18 @@
   $('#pdf-btn').onclick=()=>exportMedia('pdf');
   function openJson(all=false){const data=all?{...snapshot(),exportedAt:new Date().toISOString()}:{...structuredClone(state),exportedAt:new Date().toISOString()},json=JSON.stringify(data,null,2);$('#export-data').value=json;$('#download-json').href='data:application/json;charset=utf-8,'+encodeURIComponent(json);$('#download-json').download=(all?'Voyz — все туры':state.tour.title.replace(/[^\p{L}\p{N} _-]/gu,'').slice(0,70)||'Voyz')+'.json';$('#export-summary').textContent=(all?'Все туры: '+library.tours.length:'«'+state.tour.title+'»')+' · Включены клиенты и оплаты. Для команды используйте PDF.';$('#export-dialog').showModal();}
   $('#export-btn').onclick=()=>openJson(false);$('#backup-btn').onclick=()=>openJson(true);$('#export-close').onclick=()=>$('#export-dialog').close();
+  $('#kyrgyzstan-2027-btn').onclick=()=>{
+    if(library.tours.length>=100)return toast('Максимум 100 туров.');
+    const tour=normalizeTour(structuredClone(window.VOYZ_KYRGYZSTAN_2027));
+    tour.id=uid();
+    // Reuse the existing licensed destination photos in the appropriate days.
+    for(const [dayIndex,photoIndex] of [[0,1],[2,2]]){
+      const p=(window.VOYZ_PHOTOS||[])[photoIndex];
+      if(p)Object.assign(tour.days[dayIndex],{photo:p.data,photoCredit:p.credit});
+    }
+    library.tours.push(tour);switchTour(tour.id);setMode('board');arrange(true);
+    toast('Добавлен маршрут на июль 2027. Выберите точные даты; все поля и фото редактируются.');
+  };
   $('#import-btn').onclick=()=>{$('#import-file').value='';$('#import-file').click();};
   $('#import-file').onchange=async e=>{const f=e.target.files[0];if(!f)return;try{if(f.size>150*1024*1024)throw new Error('Максимальный размер JSON — 150 МБ.');const raw=JSON.parse(await f.text()),tours=raw.kind==='voyz-library'?normalizeLibrary(raw).tours:[normalizeTour(raw)];if(library.tours.length+tours.length>100)throw new Error('Максимум 100 туров.');if(await confirmAction('Добавить туры из файла?','Будет добавлено туров: '+tours.length+'. Существующие туры останутся.','Добавить')){tours.forEach(t=>{t.id=uid();library.tours.push(t);});switchTour(tours[0].id);toast('Туры добавлены.');}}catch(err){toast(err instanceof SyntaxError?'Некорректный JSON. Ваши туры не изменены.':err.message,true);}};
   cards.addEventListener('input',e=>{const el=e.target.closest('[data-field]');if(!el)return;const d=getDay(el.closest('[data-id]').dataset.id),key=el.dataset.field,r=el.closest('[data-row]'),max=key==='time'?30:['title','lodgingName'].includes(key)?300:key==='lodgingUrl'?2000:['noteTitle','planBTitle'].includes(key)?100:20000;const value=el.innerText.replace(/\r/g,'').slice(0,max);if(r)d.schedule.find(x=>x.id===r.dataset.row)[key]=value;else d[key]=value;if(key==='title')renderSidebar();if(key==='lodgingUrl'){const link=$('.lodging-open',el.closest('[data-id]')),url=safeLink(value);link.hidden=!url;link.href=url||'#';}save();});
