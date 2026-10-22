@@ -11,7 +11,7 @@
       let saved;try{saved=JSON.parse(this.storage?.getItem(this.namespace(owner))||'null');}catch{}
       for(const row of rows)this.records.set(row.id,{document:this.validate(row.document),revision:row.revision,dirty:false,edits:0,error:'',pending:null});
       for(const r of saved?.records||[]){if(!r.dirty&&!offline)continue;try{const doc=this.validate(r.document),online=this.records.get(doc.id);this.records.set(doc.id,{...r,document:doc,error:online&&online.revision!==r.revision?'Конфликт версий: сохраните отдельную копию.':r.error||'',pending:null});}catch{}}
-      const wanted=requested||saved?.activeId;this.activeId=this.records.has(wanted)?wanted:this.records.keys().next().value||null;this.persist();this.emit();
+      const wanted=requested||saved?.activeId;this.activeId=this.records.has(wanted)&&(requested||!this.records.get(wanted).document.deletedAt)?wanted:[...this.records.values()].find(r=>!r.document.deletedAt)?.document.id||null;this.persist();this.emit();
     }
     refresh(rows){for(const row of rows){const local=this.records.get(row.id);if(!local?.dirty&&!local?.pending)this.records.set(row.id,{document:this.validate(row.document),revision:row.revision,dirty:false,edits:0,error:'',pending:null});}this.persist();this.emit();}
     add(document){const doc=this.validate(document);if(this.records.has(doc.id))throw Error('Такая смета уже существует.');this.records.set(doc.id,{document:doc,revision:0,dirty:true,edits:1,error:'',pending:null});this.activeId=doc.id;this.persist();this.emit();this.schedule(doc.id);return doc;}
