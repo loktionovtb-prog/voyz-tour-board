@@ -1,4 +1,4 @@
-const CACHE='voyz-shell-v3-5';
+const CACHE='voyz-shell-v3-6';
 const ASSETS=['./','index.html','styles.css','v2.css','v3.css','cloud-ui.css','app.js','budget.html','budget.css','budget-model.js','budget-xlsx.js','budget.js','storage.js','exports.js','photos.js','brand.js','cloud-config.js','cloud-sync.js','cloud-ui.js','offline.js','vendor/pdf-lib.min.js','vendor/supabase.js','assets/voyz-logo.png','assets/voyz-icon.jpg','assets/voyz-app-icon.svg','manifest.webmanifest','credits.html'];
 self.addEventListener('install',e=>e.waitUntil(caches.open(CACHE).then(c=>c.addAll(ASSETS)).then(()=>self.skipWaiting())));
 self.addEventListener('activate',e=>e.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k.startsWith('voyz-shell-')&&k!==CACHE).map(k=>caches.delete(k)))).then(()=>self.clients.claim())));
